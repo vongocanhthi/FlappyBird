@@ -33,9 +33,10 @@ public class GameView extends View {
     int minTubeOffSet, maxTubeOffSet;
     int numberOffTubes = 4;
     int distanceBetweenTubes;
-    int tubeX;
-    int topTubeY;
+    int[] tubeX = new int[numberOffTubes];
+    int[] topTubeY = new int[numberOffTubes];
     Random random;
+    int tubeVelocity = 8;
 
     public GameView(Context context) {
         super(context);
@@ -73,8 +74,10 @@ public class GameView extends View {
         minTubeOffSet = gap/2;
         maxTubeOffSet = dHeight - minTubeOffSet - gap;
 
-        tubeX = dWidth/2 - topTube.getWidth()/2;
-        topTubeY = minTubeOffSet + random.nextInt(maxTubeOffSet - minTubeOffSet + 1);
+        for (int i=0; i < numberOffTubes;i++){
+            tubeX[i] = dWidth + i * distanceBetweenTubes;
+            topTubeY[i] = minTubeOffSet + random.nextInt(maxTubeOffSet - minTubeOffSet + 1);
+        }
     }
 
     private void mapping() {
@@ -105,8 +108,16 @@ public class GameView extends View {
                 velocity += gravity;
                 birdY += velocity;
             }
-            canvas.drawBitmap(topTube, tubeX, topTubeY - topTube.getHeight(), null);
-            canvas.drawBitmap(bottomTube, tubeX, topTubeY + gap, null);
+
+            for (int i=0; i < numberOffTubes;i++){
+                tubeX[i] -= tubeVelocity;
+                if (tubeX[i] < -topTube.getWidth()) {
+                    tubeX[i] += numberOffTubes * distanceBetweenTubes;
+                    topTubeY[i] = minTubeOffSet + random.nextInt(maxTubeOffSet - minTubeOffSet + 1);
+                }
+                canvas.drawBitmap(topTube, tubeX[i], topTubeY[i] - topTube.getHeight(), null);
+                canvas.drawBitmap(bottomTube, tubeX[i], topTubeY[i] + gap, null);
+            }
         }
 
         canvas.drawBitmap(birds[birdFrame], birdX, birdY, null);
@@ -120,7 +131,6 @@ public class GameView extends View {
         if (action == MotionEvent.ACTION_DOWN) {
             velocity = -30;
             gameState = true;
-            topTubeY = minTubeOffSet + random.nextInt(maxTubeOffSet - minTubeOffSet + 1);
         }
         return true;
     }
